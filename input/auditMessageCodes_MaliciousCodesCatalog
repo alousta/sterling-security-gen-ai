@@ -1,0 +1,597 @@
+#######Modification History##################################################################################################
+#Jira     Date           By             Change
+#SSP-3536 2019-05-13     Tusharar    Added-AUD0135E for Threat model auth failure message
+#SSP-3603 2019-07-02     naru        Support for Single Logout from SAML IdP
+#SSP-4326 2020-04-20     Vijay       HTTP implementation based on state transition design for ICAP Integration - Part 2
+#SSP-4606 2020-06-21     Naru        Audit log messages for CD ICAP support are missing
+#                                    Added audit log messages used in cd pas for CD ICAP support
+#SSP-4694 2020-09-06     Naru        Audit log messages for CD socks5 proxy support
+#SSP-5225 2021-07-29	 Vijay       HTTP ICAP Integration with MFG2.0
+#SSP-5451 2021-08-13     Naru        Different level of logging for blacklists in SSP
+#SSP-5611 2021-09-27	 Vijay       Need to log file names in HTTP ICAP scans.
+#MFT-12423 2021-11-23    Vijay       Unknown SFTP user can log in to SSP without a userid on the backend.
+#
+#############################################################################################################################
+
+#Audit Message Codes
+
+#CM Audit messages
+AUD0001I = {0} Version {1}.{2}, Patch {3}, Fix {4}, Build {5} started.
+AUD0002I = {0} terminated.
+AUD0003I = {0} is operating in FIPS mode.
+AUD0004I = Starting Audit Logging for IBM Secure Proxy.
+AUD0005I = Ending Audit Logging for IBM Secure Proxy.
+
+AUD0101I = SessionId: {0} - Configuration object definition for {1} created by {2}.
+AUD0102I = SessionId: {0} - Configuration object definition for {1} deleted by {2}.
+AUD0103I = SessionId: {0} - Configuration object definition for {1} updated by {2}.
+AUD0104I = Push configuration for Engine {0} succeeded. Version={1}.
+AUD0105E = Push configuration for Engine {0} failed. Engine response={1}. 
+AUD0106I = Engine configuration updated to version {0}.
+AUD0107I = Engine configuration initialized with version {0}.
+AUD0108I = Engine {0} has no version.  CM background agent is pushing a new configuration with version={1}.
+AUD0109I = Engine {0} has older version.  CM background agent is pushing a new configuration with version={1}.
+AUD0110W = Engine {0} has newer version.  Version={1}.
+AUD0111E = CM background agent is unable to connect to Engine {0}.
+AUD0112I = Stopping engine {0} succeeded.
+AUD0113E = Stopping engine {0} failed.  Engine response={1}.
+AUD0114I = Performing operation {0} on adapter {1} by {2} succeeded.
+AUD0115E = Performing operation {0} on adapter {1} by {2} failed.  Engine response={3}.
+AUD0116I = SessionId: {0} - Login attempt to CM by {1} through local store succeeded with an operator role of {2}.
+AUD0116E = SessionId: {0} - Login attempt to CM by {1} through External Authentication Server with profile {2} failed with an operator role of {3}.
+AUD0117I = SessionId: {0} - Login attempt to CM by {1} through External Authentication Server with profile {2} succeeded with an operator role of {3}.
+AUD0117E = SessionId: {0} - Login attempt to CM by {1} through local store Failed with an operator role of {2}
+AUD0118I = SessionId: {0} - Logoff attempt to CM by {1} succeeded.
+AUD0118E = SessionId: {0} - Logoff attempt to CM by {1} Failed.
+
+AUD0118W = SessionId: {0} - The password for user {1} has expired.
+AUD0119I = SessionId: {0} - User account {1} is being unlocked after lockout period has expired.
+AUD0119E = SessionId: {0} - Login attempt to CM by {1} exceeded, user account will be locked for {2} minutes.
+AUD0119W = SessionId: {0} - User account {1} attempted to login while account is locked.
+AUD0121I = SessionId: {0} - CM user {1} created.
+AUD0122I = SessionId: {0} - CM user {1} deleted.
+AUD0123I = SessionId: {0} - CM user {1} updated.
+AUD0124I = SessionId: {0} - Start attempt of CM by {1} succeeded.
+AUD0125I = SessionId: {0} - Performing operation CM_STOP by {1} succeeded.
+AUD0124E = SessionId: {0} - Start attempt of CM by {1} failed because of {2}.
+AUD0125E = SessionId: {0} - Performing operation CM_STOP by {1} failed because of {2}.
+AUD0126I = Passphrase provided has unlocked the key.
+AUD0127I = Service [{0}] started successfully.
+AUD0128I = Service [{0}] initialized successfully.
+AUD0129I = Service [{0}] stopped successfully.
+AUD0130I = Bootstrap succeeded.
+
+AUD0126E = Passphrase provided doesn't unlock key.
+AUD0127E = Service [{0}] failed to start: {1}
+AUD0128E = Service [{0}] failed to initialize: {1}
+AUD0129E = Service [{0}] failed to stop.
+AUD0130E = Bootstrap failed.
+
+AUD0131I = CM Jetty Connector {0} successfully started on port {1}
+AUD0131E = CM Jetty Connector {0} failed to start on port {1}
+
+AUD0132I = CM Jetty Connector {0} running on port {1} stopped successfully
+AUD0132E = CM Jetty Connector {0} running on port {1} failed to stop
+
+AUD0133I = Engine: {0} has a version {1} which is compatible with CM version {2}
+AUD0133E = Engine: {0} has a version {1} which is not compatible with CM version {2}, push to this engine will not be attempted.
+
+AUD0134I = SessionId: {0} - Performing operation auto CM_STOP by {1} succeeded.
+
+AUD0135E = [{0}] - Incorrect System passphrase entered.
+AUD0136E = [{0}] - Invalid Administrator ID or password entered.
+
+# System messages
+SYST007E = FIPS mode could not be enabled.
+SYST008E = Error loading {0}: {1}
+SYST009W = WARNING - Configuration files are not encrypted.
+SYST010E = Could not find system key file ({0}). Please execute {1} to convert the old key file to the new format.
+SYST046I = idmb.enc has been uprgaded to idmb2.enc {0}
+SYST046E = Upgrading of idmb.enc to idmb2.enc has failed {0}, the system may not startup properly.
+SYST047I = upgraded the default cipher suites {0}
+SYST047E = Upgrading of the default cipher suites has failed {0}, the system may not function properly.
+
+
+# Accepter messages
+ACPT037I = Session: {0} - Received connection. Address={1}
+ACPT038I = Session: {0} - Connection terminated normally. Address={1}
+ACPT039W = Session: {0} - Connection terminated abnormally. Address={1}
+ACPT040I = Session: {0} - Connection secured. Address={1}, Protocol={2}, Cipher={3}, SubjectDN=[{4}]
+ACPT042E = Session: {0} - Failed to secure connection. Address={1} : {2}
+ACPT043E = Session: {0} - Lost connection. Address={1} : {2}
+ACPT045W = Session: {0} - The selected TLS/SSL protocol [{1}] cannot be used in FIPS mode. Protocol will be forced to [{2}].
+ACPT046E = None of the selected ciphers could be enabled for FIPS mode. Please select one or more ciphers from the following list: {0}
+
+# Upgrade messages
+UPG0200I=Upgrade script is saving the following file {0}.
+UPG0201I=Upgrade process begins saving configuration.
+UPG0201W=Upgrade process begins saving configuration with warnings.
+UPG0202I=Upgrade process ends successfully.
+UPG0202E=Upgrade process ends while saving {0} with an exception: {1}.
+
+#Engine Audit messages
+AUD0201I = Session {0} [{1}]: Inbound connection from {2}/{3} received.
+AUD0202W = Session {0} [{1}]: No matching inbound node for address {2}/{3} found in netmap [{4}].
+AUD0203E = Session {0} [{1}]: Session aborted. {2}
+AUD0204I = Session {0} [{1}]: Inbound address {2}/{3} matched with node [{4}] in netmap [{5}].
+AUD0205I = Session {0} [{1}]: Outbound plain socket connection with primary node {2}/{3} established.
+AUD0206I = Session {0} [{1}]: Outbound connection with {2}/{3} closed.
+AUD0207I = Session {0} [{1}]: Inbound connection from {2}/{3} closed.
+AUD0208I = Session {0} [{1}]: Session ended.
+AUD0209I = Session {0} [{1}]: {2} Handshake with peer at {3} {4}:{5} completed. Security protocol={6}, Cipher={7}, Subject=[{8}], Public key length={9}.
+AUD0210E = Session {0} [{1}]: Handshake with peer at {2} failed. {3}
+AUD0211E = Session {0} [{1}]: Primary outbound connection with {2}/{3} failed. {4}
+AUD0212E = Session {0} [{1}]: Outbound connection with {2}/{3} abruptly closed. {4}.
+AUD0213E = Session {0} [{1}]: Inbound connection from {2}/{3} abruptly closed. {4}.
+AUD0214I = Session {0} [{1}]: User {2} successfully authenticated.
+AUD0215W = Session {0} [{1}]: Local user authentication failed. User id required.
+AUD0216W = Session {0} [{1}]: Local user authentication for {2} failed. Maximum login retries exceeded.
+AUD0217W = Session {0} [{1}]: Local user authentication for {2} failed. User account locked.
+AUD0218W = Session {0} [{1}]: Local user authentication for {2} failed. Inactive or incorrect user, password, or key.
+AUD0219E = Session {0} [{1}]: Local user authentication for {2} failed. Configuration error - {3}
+AUD0220W = Session {0} [{1}]: User authentication for {2} on outbound host failed. {3}.
+AUD0221I = Session {0} [{1}]: User {2} authenticated on outbound host.
+AUD0222W = Session {0} [{1}]: User {2} authenticated on outbound host. Server did not require password.
+AUD0223E = Session {0} [{1}]: EA user authentication for {2} failed. Internal Error. Check EA connectivity.
+AUD0224E = Session {0} [{1}]: EA user authentication for {2} failed. Unknown Error.
+AUD0225W = Session {0} [{1}]: EA user authentication for {2} failed. {3}
+AUD0226I = Session {0} [{1}]: User {2} authenticated with EA.
+AUD0227E = Attempt to shutdown Engine failed: {0}
+AUD0228I = Session {0} [{1}]: Outbound plain socket connection with alternate node {2}/{3} established.
+AUD0229E = Session {0} [{1}]: Alternate outbound connection with {2}/{3} failed. {4}
+AUD0230I = Session {0} [{1}]: Login request from {2}/{3} received.
+AUD0231W = Session {0} [{1}]: No matching inbound node for address {2}/{3} found in any SFTP netmap.
+AUD0232E = Session {0} [{1}]: Local user authentication for {2} failed. {3}
+
+AUD0233E=[TLSCheck.validCerts]Certificate validation check failed - incomplete certificate chain
+AUD0234E=[TLSCheck.validCerts]Certificate validation check failed - invalid certificate signature
+AUD0235E=[TLSCheck.validCerts]Certificate validation check failed - untrusted certificate
+AUD0236E=[TLSCheck.certificateCallback] - ClientAuth failed - no certificate
+AUD0237E=[TLSCheck.certificateCallback] - ClientAuth failed - expired certificate
+AUD0238E=[TLSCheck.certificateCallback] - ClientAuth failed - external certificate auth check failed
+AUD0239E=[TLSCheck.certificateCallback] certificate expired, but configured to allow.
+AUD0240I=[TLSCheck.certificateCallback] direct trust check succeeded.
+AUD0241E=[TLSCheck.certificateCallback] direct trust check failed.
+AUD0242E=[TLSCheck.certificateCallback] direct trust check failed - exception -{0}
+AUD0243E=[TLSCheck.certificateCallback] toolkit level certificate auth failed.
+AUD0244I=[TLSCheck.certificateCallback] self-signed certificate direct trust ok. Cert {0} of {1} {2}{3}
+AUD0245E=[TLSCheck.certificateCallback] direct trust failed - exception - {0}
+AUD0246I=[TLSCheck.certificateCallback] toolkit level certificate auth succeeded.
+AUD0247E=[TLSCheck.certificateCallback] Common Name from cert: {0} does not match: {1}
+AUD0248E=[TLSCheck.certificateCallback] Organization name from cert: {0} does not match {0} does not match: {1}
+AUD0249E=[TLSCheck.certificateCallback] Organization name from cert: {0} does not match {0} does not match: {1}
+AUD0250E=[TLSCheck.certificateCallback] Exception in Domain name checking - {0}
+AUD0251E=[TLSCheck.certificateCallback] Cert {0} of {1} {2}{3}
+AUD0252I=[TLSCheck.checkDirectTrust] Signature checking done - OK.
+AUD0253E=[TLSCheck.certificateCallback] Direct Trusted cert not verified, exception: {0}
+AUD0254E=[TLSCheck.normalizeCert] Exception - {0}
+AUD0255E=[TLSCheck.validCerts]Certificate validation check failed, error - {0}
+AUD0256E=[TLSCheck.validCerts]Certificate validation check failed - invalid certificate chain
+AUD0257E=[TLSCheck.validCerts]Certificate validation check failed - expired certificate
+AUD0258E=[TLSCheck.checkDirectTrust] Certificate chain is null or empty.
+AUD0259W = Session {0} [{1}]: Local user authentication for {2} failed. Password expired.
+AUD0260E = Session {0} [{1}]: Session timeout
+AUD0261E = Session <notSet> [{1}]: Failed to negotiate transport component {0}
+AUD0262W = Session <notSet> [{1}]: Failed to negotiate transport component {0}
+AUD0263E = Session {0} [{1}]: App. Auth invalidating token failed. Configuration error - {2}, token - {3}
+AUD0264E = Session {0} [{1}]: Local user authentication for {2} failed. Configuration error - {3}, token: {4}
+AUD0265W = Session {0} [{1}]: Local user authentication for {2} failed. token : {3}
+AUD0266W = Session {0} [{1}]: Local user authentication for {2} failed. Maximum login retries exceeded. token: {3}
+AUD0267W = Session {0} [{1}]: Local user authentication for {2} failed. User account locked. token: {3}
+AUD0268E = Session {0} [{1}]: EA user authentication for {2} failed. Internal Error. Check EA connectivity. token: {3}
+AUD0269W = Session {0} [{1}]: EA user authentication for {2} failed. Unknown Error: {4} token: {3}
+AUD0270W = Session {0} [{1}]: EA user authentication for {2} failed. token: {3}
+AUD0271I = Session {0} [{1}]: EA password has been changed for user {2}.
+
+AUD0272W = Session {0} [{1}]: EA user authentication for {2} failed. User account locked locally.
+AUD0273W = Session {0} [{1}]: EA user authentication for {2} failed. Inactive or incorrect user, password.
+AUD0274W = Session {0} [{1}]: EA user authentication for {2} failed. Communication error in EA.
+AUD0275W = Session {0} [{1}]: EA user authentication for {2} failed. Login not allowed in this time period.
+AUD0276W = Session {0} [{1}]: EA user authentication for {2} failed. Password expired.
+AUD0277W = Session {0} [{1}]: EA user authentication for {2} failed. Account disabled.
+AUD0278W = Session {0} [{1}]: EA user authentication for {2} failed. Account expired.
+AUD0279W = Session {0} [{1}]: EA user authentication for {2} failed. Account locked in EA backend system.
+AUD0280W = Session {0} [{1}]: EA user authentication for {2} failed. unknown error.
+
+AUD0281W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Inactive or incorrect user, password.
+AUD0282W = Session {0} [{1}]: EA change password - user authentication for {2} failed. User account locked locally.
+AUD0283E = Session {0} [{1}]: EA change password - user authentication for {2} failed. Internal Error. Check EA connectivity.
+AUD0284W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Communication error in EA.
+AUD0285W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Login not allowed in this time period.
+AUD0286W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Password expired.
+AUD0287W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Account disabled.
+AUD0288W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Account expired.
+AUD0289W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Account locked in EA backend system.
+AUD0290W = Session {0} [{1}]: EA change password - user authentication for {2} failed. unknown error.
+AUD0291W = Session {0} [{1}]: EA change password - failed for {2}.
+AUD0292W = Session {0} [{1}]: EA change password - user {2} new password does not meet policy.
+AUD0293W = Session {0} [{1}]: EA change password - user {2} can not change password.
+AUD0294E = Session {0} [{1}]: EA change password - failed for {2} - error.
+
+AUD0295I = Session {0} [{1}]: EA user authentication for {2} done, must change password.
+AUD0296I = Session {0} [{1}]: User {2} successfully authenticated for must change password.
+AUD0297I = Session {0} [{1}]: EA password has been changed for user {2} (Must change).
+#AUD0298W = Session {0} [{1}]: EA change password - user {2}. Can not change expired password.
+AUD0299W = Session {0} [{1}]: EA change password - user authentication for {2} failed. Password expired, Admin reset required.
+AUD0300W = Session {0} [{1}]: EA user authentication for {2} failed. Password expired, Admin reset required.
+
+# Configuration scripts' messages
+AUD0301I=Self-signed key-certificate generated on {0} keystore.
+AUD0302I=External key-certificate added to {0} keystore.
+AUD0303I=Key-certificate blob extracted from {0} keystore.
+AUD0304I=Key-certificate updated on {0} keystore with CA-signed certificate.
+AUD0305I=Key-certificate deleted from {0} keystore.
+AUD0306I=Key-certificate exported from {0} keystore.
+AUD0307I=Self-signed key-certificate generated on {0} keystore for Certificate Signing Request.
+AUD0308I=Key-certificate copied on {0} keystore.
+AUD0309I=Key-certificate renamed.
+AUD0310I=Key-certificate moved to [{0}] system certificate store.
+AUD0311I=Support for {0} HSM enabled.
+AUD0312I=HSM support disabled.
+AUD0313I=Keystore password for HSM key-certificate updated with new password.
+AUD0314I=SSL configuration updated.
+AUD0315I=SSL configuration updated: keystore password changed.
+AUD0316I=SSL configuration reset to factory defaults.
+AUD0317I=SSL configuration exported.
+AUD0318I=Accepter configuration updated.
+
+AUD0319E=[TLSCheck.validCerts]Certificate validation check failed - Error
+AUD0320I=[TLSCheck.certificateCallback] Certificate chain  Cert {0} of {1} {2}{3}
+AUD0321I = Session {0} [{1}]: User {2} password authenticated with EA.
+AUD0322I = Session {0} [{1}]: User {2} security code authenticated with EA.
+AUD0323W = Session {0} [{1}]: EA user password authentication for {2} failed. {3}
+AUD0324W = Session {0} [{1}]: EA user security code authentication for {2} failed. {3}
+
+#### RTC 531365,511928
+AUD0325I=Password Policy updated during CM startup.
+AUD0326I=Keystore updated during CM startup.
+AUD0327I=Adapter updated during CM startup.
+AUD0328I=Netmap updated during CM startup.
+AUD0329I=SysSslInfo updated during CM startup.
+
+#SSP-6393
+AUD0330I=defSslInfo updated during CM startup.
+
+AUD0330W=Session {0} [{1}]: Userid {2} failed local ssh public key validation
+AUD0331W=Session {0} [{1}]: Userid {2} failed EA ssh public key validation
+AUD0332I=Session {0} [{1}]: Userid {2} local ssh public key validation successful
+AUD0333I=Session {0} [{1}]: Userid {2} EA ssh public key validation successful
+AUD0334E=Session {0} [{1}]: SAML2 AuthnResponse verification failed for Userid: ({2}), Internal error.
+AUD0335W=Session {0} [{1}]: SAML2 AuthnResponse verification failed for Userid: ({2})
+AUD0336E=Session {0} [{1}]: SAML2 AuthnResponse verification failed for Userid: ({2}), Unknown Error.
+
+#SSP-3603
+AUD0337I = Session {0}, webSessionId: {1}, User: {2} - SAML2 LogoutRequest received from IdP. Sending LogoutResponse to IdP. 
+AUD0338E = Session {0}, MDN send failed. Received CloseCode: {0} from Client before sending MDN, sending Connection Reset to Server. 
+
+# MFT-10564
+AUD3003W=Session {0} [{1}]: UserId {2} is blacklisted.
+
+# CD PAS Audit message codes
+AUD3001E=SNode ACL check failed - PNode {0}, SNode {1}.
+AUD3002E=Alternate SNode ACL check failed - PNode {0}, SNode {1}, Alternate SNode {2}.
+
+
+#SSP-4606 CD PAS audit msgs for CD ICAP AV Scanning support
+
+AUD3004E=Copy terminated for file ({0}) due to internal error with ICAP Server
+AUD3005E=File ({0}) will be transferred without Anti Virus scan, due to internal error with ICAP Server
+AUD3006I=No malware reported during ICAP AV scanning of file - {0}
+AUD3007E=ICAP AV Scanning failed, malware detected file: {0}, ICAP response : {1}, Virus name: {2}, Reputation: {3}, Geo Location: {4}
+AUD3008I=Data Compression (Standard/Extended) is enabled, File ICAP AV Scanning skipped, file - {0}
+AUD3009I=File extension not in selected list, ICAP AV Scanning skipped for file - {0}
+AUD3010I=FASP is enabled at PNODE & SNODE, ICAP AV Scanning skipped for file - {0}
+AUD3011I=File ({0}) transferred without Anti Virus scan, due to internal error with ICAP Server
+AUD3012E=ICAP internal error, skipping AV scan, File ({0}) transfer to backend failed - {1}
+AUD3013E=ICAP AV scan successful, File ({0}) transfer to backend failed - {1}
+AUD3014I=ICAP AV scan successful, File ({0}) transferred to backend.
+
+#SSP-4694 - CD socks5 proxy support
+AUD3015E=CD connection to SNode/destination CD server thru socks proxy failed - {0}
+
+# EA messages
+
+SSE1800I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA component initializing. PSname={3}, Host={4}, Port={5}, Secure connection={6}, Alternate EA servers={7}.
+SSE1810I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Connecting to EA server.
+SSE1811E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Connection to EA server: {3} failed. Reason: {4}.
+SSE1811I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Connection to EA server: {3}, successful. 
+SSE1812E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Receive from EA server failed. Reason: {3}.
+SSE1812W=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received null response from EA server. Response Correlator: {3}.
+SSE1813E=Engine Name={0}, Adapter Name={2}, EA Name={2}. Send to EA server failed. Reason: {3}.
+SSE1814E=Engine Name={0}, Adapter Name={1}, EA Name={2}. All connection attempts to primary and alternate EA servers failed.
+SSE1815E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Detected that connection was lost to EA server.
+SSE1816E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Connection closed to EA server. Reason: {3}.
+SSE1817I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending certificate validation request to EA server. Client: {3} Profile: {4}
+SSE1818I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA connection component initialization complete.
+SSE1819I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA connection component terminating.
+SSE1820I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA connection component termination complete.
+SSE1821I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA Perimeter Services connection initializing.
+SSE1822I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA Perimeter Services connection initialization complete.
+SSE1823I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA Perimeter Services connection terminating.
+SSE1824I=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA Perimeter Services connection termination complete.
+SSE1825I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending user authentication request to EA server. Client: {3} Profile: {4}  User: {5}
+SSE1826I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received certificate validation response from EA server. Client: {3} Profile: {4} Message: {5}
+SSE1826E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received certificate validation response from EA server. Client: {3} Profile: {4} Message: {5}
+SSE1827I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received user authentication response from EA server. Client: {3} Profile: {4}  User: {5}  Message: {6}
+SSE1827E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received user authentication response from EA server. Client: {3} Profile: {4}  User: {5}  Message: {6}
+SSE1828I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Starting SSL/TLS Handshake with EA server. Settings: {3} 
+SSE1829I=Engine Name={0}, Adapter Name={1}, EA Name={2}. SSL/TLS Handshake with EA server successful. 
+SSE1830E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Possible invalid EA server detected.  Check configuration. Exception: {3}. 
+SSE1831I=SessionId: {0} Authentication mechanism: {1}.
+SSE1831E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Perimeter Server for EA not available. PSname={3}.
+SSE1832E=No passphrase supplied. SSP component terminating.
+SSE1833E=Incorrect passphrase specified. SSP component terminating.
+SSE1834I=Stopping adapter. Engine={0}. Name={1}.
+SSE1835I=Stop adapter complete. Engine={0}. Name={1}.
+SSE1835E=Stop adapter exception. Engine={0}. Name={1}. Exception={2}.
+SSE1836I=Stopping engine. Name={0}.
+SSE1836E=No passphrase supplied from Configuration Manager to stop engine. Engine Name={0}.
+SSE1837E=Incorrect passphrase supplied from Configuration Manager to stop engine. Engine Name={0}.
+SSE1838I=Stop engine complete.  Engine must be manually restarted. Name={0}.
+SSE1838E=Stop engine exception. Engine Name={0}. Exception={1}.
+SSE1839E={0}
+SSE1840I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending token validation request to EA server. Client: {3} Token: {4}
+SSE1841I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received token validation response from EA server. Client: {3} Token: {4} Replacement Token: {5}  Message: {6}
+SSE1842I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending token invalidation request to EA server. Client: {3} Token: {4}
+SSE1843I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received token invalidation response from EA server. Client: {3} Token: {4} Message: {5}
+SSE1844E=Engine Name={0}, Adapter Name={1}, EA Name={2}. EA Server does not support Single Signon (SSO) authentication. Message: {3} 
+SSE1845I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received token validation response from EA server, no new token. Client: {3} Token: {4}  Message: {5}
+SSE1845E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received token validation response from EA server. Client: {3} Token: {4}  Message: {5}
+SSE1846I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending user change password request to EA server. Client: {3} Profile: {4}  User: {5}
+SSE1847I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received response for change password from EA server. Client: {3} Profile: {4}  User: {5}  Message: {6}
+SSE1847E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received response for change password from EA server. Client: {3} Profile: {4}  User: {5}  Message: {6}
+SSE1848I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Obtained token from EA. Client: {3} Profile: {4}  User: {5}  Token: {6}
+SSE1849I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending user authentication request to EA server to request single-signon (SSO) token. Client: {3} Profile: {4}  User: {5}
+SSE1850I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending end conversation request to EA server. Client: {3} Profile: {4}  Conversation Id: {5}
+SSE1851I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received end conversation response from EA server. Client: {3} Profile: {4}  Conversation Id: {5} Message: {6}
+SSE1852I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Primary EA server ({3}) is back up, closing connection to {4}
+SSE1853I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Sending SAML2 AuthnResponse verification request to EA server. Client: {3}
+SSE1854I=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received SAML2 AuthnResponse verification success response from EA server. Client: {3} Userid: {4} Token: {5}  Message: {6}
+SSE1855E=Engine Name={0}, Adapter Name={1}, EA Name={2}. Received SAML2 AuthnResponse verification failed response from EA server. Client: {3} Userid: {4} Message: {5}
+SSE1856I=User ({0}) authenticated successfully from external IdP
+
+
+# DOSAttackMitigator messages 
+SSE1900I=DOS Attack Mitigator scan timer thread starting.
+SSE1900E=Invalid value for DOS Attack Mitigator property: {0}={1}
+SSE1901E=DOS Attack Mitigator callback method closing client connection from {0}.
+SSE1901I=DOS Attack Mitigator scan timer started.
+SSE1902E=DOS Attack Mitigator callback close complete in {0}.
+
+SSE1902I=DOS Attack Mitigator starting.
+SSE1903I=DOS Attack Mitigator start complete.
+SSE1904I=DOS Attack Mitigator refreshing.
+SSE1905I=DOS Attack Mitigator refresh complete.
+SSE1906I=DOS Attack Mitigator stopping.
+SSE1907I=DOS Attack Mitigator stop complete.
+SSE1908I=DOS Attack Mitigator Scan Timer stopping.
+SSE1909I=DOS Attack Mitigator Scan Timer stop complete.
+
+SSE1903E=DOS Attack detected: {0}
+SSE1904E=DOS Attack mitigated: {0}
+SSE1905E=DOS Attack detection error: {0}
+SSE1906E=DOS Attack processing error: invalid event id {0}
+SSE1907E=DOS Attack processing error: orphan session discovered. {0}
+SSE1908E=DOS Attack processing error: no session event map in IPAddress map entry:  {0} {1}
+SSE1909E=DOS Attack processing error: no IP address available for orphan session. Session event info: {0} 
+SSE1910E=DOS Attack scan timer error: invalid scan time interval: {0}
+SSE1911E=DOS Attack processing error: engine config, adapter config, and/or logger not set by adapter.
+SSE1912E=DOS Attack scan timer error: invalid scan time enabled value(Y|N): {0}
+
+
+
+# FTP messages
+SSE2200E={0} {1} {2} SSL/TLS required but incompatible configurations.  Check {2} Netmap SSL/TLS settings (enabled cipher suites, certificates, etc.).
+SSE2201E={0} {1} {2} Bad protocol sequence: password received before userid.  Insure FTP client is supported by SSP.
+SSE2202E={0} {1} {2} Server is not willing to accept the named security mechanism.
+SSE2202I=Security data exchange complete.
+SSE2203I={0} {1} {2} command received from client.
+SSE2203E={0} {1} {2} Only encrypted data channel is supported.
+SSE2204E={0} {1} {2} {3}
+SSE2205E={0} {1} {2} {3}
+
+# sftp messages
+SSE2600=\ SFTP Instance Initialized, Backend Session is {0}, Sessionid is {1}
+SSE2601=\ Message Rejected Due To SFTP Policies: {0}
+SSE2602=\ SessionId={0} Public key authenticated user Session: {1} addressing {3} {2}
+SSE2603=\ SessionId={0} User Logged Off: {1}
+SSE2604=\ SessionId={0} User "{1}" Addressing {3} Command: {2}, operand(1) {4}
+SSE2605=\ SessionId={0} SFTP Instance Shutdown
+SSE2606=\ Log for class {0} acquired
+SSE2607=\ Backend Connected to {0}
+SSE2608=\ Backend Authentication {1} for Userid {0}
+SSE2609=\ Sessionid {0} backend session ending
+SSE2610=\ Sessionid {0} Userkey {1} Invalid Logon Attempt, Count {2}, locked: :{3}, last failed attempt TS: {4}
+SSE2611=\ User {0} now valid. info={1} current ts {2} 
+SSE2612=\ Sessionid {0} Login prevented.  User {1} Address {2} 
+SSE2613=\ SFTP Adapter is starting.
+SSE2614=\ Audit Log of Changed Parameters, Userid {0} Parameter {1} Old Value {2} New Value {3}
+SSE2615=\ Host {0} validated by key {1} with fingerprint {2} 
+SSE2616=\ Userid {0} from address {1} validated by key {2} with fingerprint {3}
+SSE2617=\ Host {0}  with fingerprint {1} validation failed 
+SSE2618=\ Sessid {0} Premo statistics summary : \n {1} 
+SSE2619=\ JMX service unregistered: {0}
+SSE2620=\ {0} maintenance levels \n {1}
+SSE2621=\ {0}
+SSE2622=\ Command {0} rejected in state {1}
+SSE2623=\ {0,date,[yyyy/MM/dd HH:mm:ss.SSS]} 
+SSE2624=\ Userid {0} from address {1} failed validation with key fingerprint {2}
+SSE2625=\ Time of last error {0} \n
+SSE2626=\ Session High-Water mark {0}. Current Sessions: \n==================================\n
+SSE2627=\ {0} \n
+SSE2628=\Extended_Content_Verification_{0}
+SSE2629=\ Mac support added for {0}
+SSE2630=\ Cipher support added for {0}
+SSE2631=\ Construct {0} not supported when using JCE 
+SSE2632=\ Old session key cleaned up: {0}
+SSE2633=\ Closing {0} due to {1} request 
+SSE2634=\ Command operand: {0}
+SSE2635=\ Construct {0} not supported when using STD 
+SSE2636=\ Command rejected due to sftp proxy policy settings: {0}
+SSE2637=\ Session {0} Node level log acquired for node {1}
+SSE2638=\ SessionId={0} Password authenticated user Session: {1} addressing {3} {2}
+SSE2639=\ Attempting connection to {0} 
+SSE2640=\ {0} 
+SSE2641=\ Unsupported server version {0}
+SSE2642=\ SessionId={0} Userid \"{1}\" transferred file {2} with size {3,number} bytes in {4,number} messages, {5,number} bytes per second
+SSE2643=\ Session max reduced to {0} due to port range limits of {1}
+SSE2644=\ SessionId={0} Userid "{1}" Connection error creating backend session: {2}
+SSE2645=\ Sessionid={0} Userkey {1} reset the account lock
+SSE2646=\ Perimeter services error : {0}
+SSE2647=\ User Authentication result : {0}
+SSE2648=\ Remote Server Greeting is {0}
+SSE2649=\ New configuration revision published is {0}
+SSE2650=\ SessionId: {0} with {1} established, kex: {2}, key: {3}, csCipher: {4}, scCipher: {5}, csMac: {6}, scMac: {7}, csComp: {8}, scComp: {9}
+SSE2651=\ Exception encountered, type: {0}, message: {1}
+SSE2652=\ {3} external event with state {0}, code {1}: {2}
+SSE2653=\ {3} external event with state {0}, code {1}: {2}
+SSE2654=\ {0} Session limit of {1} has been exceeded
+SSE2655=\ SessionId: {0} SSH Authentication mechanism: {1}.
+SSE2656=\ {3} external event with state {0}, code {1}: {2}
+SSE2657=\ {0} connection attempt for user {1} session {2} address {3} node match not found
+SSE2658=\ {0} Error loading the configuration for user {1} session {2} address {3} node match not found
+SSE2659=\ {0} SSH configuration error \"{1}\":{2}
+SSE2660=\ EA does not support checking SSH keys: {0}
+SSE2661=\ Conflicting secure zone credentials returned: {0} 
+SSE2662=\ External mapping requested but not provided.
+SSE2663=\ {1} key has not been found, or is not enabled: {0}
+SSE2664=\ Pre-authentication banner for adapter {0} changed to [{1}]
+SSE2665=\ Pre-authentication banner for adapter {0} restored to [{1}]
+SSE2666=\ Session backend port information: {0}
+SSE2667=\ Local host key {0} could not be loaded: {1}
+SSE2669=\ None of the selected ciphers could be enabled for {0} mode. Please select one or more ciphers from the following list: {1}
+SSE2670=\ None of the selected MACs could be enabled for {0} mode. Please select one or mode MACs from the following list: {1}
+SSE2671=\ Cannot use local host key [{0}] with {1}-bit key length. Keys shorter than {2} bits cannot be used in FIPS mode.
+SSE2672=\ Cannot use local user key [{0}] with {1}-bit key length. Keys shorter than {2} bits cannot be used in FIPS mode.
+SSE2673=\ Public key for user [{0}] with {1}-bit key length rejected. Remote user keys shorter than {2} bits cannot be accepted in FIPS mode.
+SSE2674=\ Public key for host [{0}] with {1}-bit key length rejected. Remote host keys shorter than {2} bits cannot be accepted in FIPS mode.
+SSE2675=\ Configured local user key is not present and will not be used for authentication: {0}
+SSE2676=\ Routing type 'Userid based Routing' is selected, no routingNodeName is returned from SEAS.
+SSE2677=\ No Outbound node in the netmap ({0}) matching the Routing node name ({1}) returned from SEAS auth.
+
+SSE2682=\ {0} 
+
+SSE2690=\ User: {0}, SCP command started: {1}
+SSE2691=\ User: {0}, SCP command failed: {1}
+SSE2705=\ User: {0}, SCP Backend session channel timedout.
+SSE2706=\ User: {0}, SCP File ( {1} ) uploaded to the Server, destination dir: ( {2} )
+SSE2707=\ User: {0}, SCP Potential Directory ( {1} ) created on the Server, destination dir: ( {2} )
+SSE2709=\ User: {0}, SCP file ( {1} ) downloaded from server, source file/dir: ( {2} )
+SSE2710=\ User: {0}, SCP potential directory ( {1} ) created on client, source file/dir: ( {2} )
+SSE2712=\ SCP is enabled.
+SSE2713=\ SCP is disabled.
+#MFT-12423
+SSE2716=\ SessionId: {0}, User: {1}, command: ({2}) is rejected as SSP does not support SSH command.
+SSE2729=\ SessionId: {0} with Sftp Client: {1} established, kex: {2}, host key: {3}, csCipher: {4}, scCipher: {5}, csMac: {6}, scMac: {7}, csComp: {8}, scComp: {9}
+
+#audit messages for ICAP-SFTP
+SSE2730=\ File ({0}) AV Scanning failed, malware detected, ICAP response : {1}, Virus name: {2}, Reputation: {3}, Geo Location: {4}
+SSE2731=\ File ({0}) AV Scanning succeeded, no virus/malware, ICAP response code: {1}
+SSE2739=\ File ({0}) AV Scanning skipped, size so far {1} exceeded limit {2}
+SSE2740=\ File ({0}) AV Scanning skipped, active ICAP Session limit ({1}) exceeded
+SSE2741=\ File ({0}) AV Scanning error - {1}, not sending file to Server
+SSE2742=\ File ({0}) AV Scanning not completed, sending unscanned file to Server, error: {1}
+SSE2743=\ File ({0}) is empty, skipping AV Scanning before sending to Server
+SSE2744=\ File ({0}) extension does not match selected extensions, skipping AV Scanning before sending to Server
+
+#SSP-5451
+SSE2748=\ SessionId: {0} UserId {1} is Blacklisted. Terminating session from - {2}
+SSE2749=\ Incoming IP ({0}) is Blacklisted. Terminating session.
+SSE2750=\ IOException reading SSH Channel Error Stream from Server - {0}
+
+#MFT-13690
+SSE2751=\ Duplicate Host Key specified for the algorithm: {0}, Key: {1} ignored.
+SSE2752=\ Host Key Loaded - algorithm: {0}, Key: {1}
+
+#MFT-13700
+SSE2753=\ File ({0}) rejecting file transfer, size so far {1} exceeded limit {2}
+
+
+# HTTP messages
+SSE2400E={0} {1} HTTP user authorization/authentication error {2} occurred.  Check mapped userid/password configuration values.
+SSE2401E={0} {1} HTTP server error {2} occurred. 
+
+
+
+# Session messages
+SSE0100I=Securing client connection.
+SSE0100E=Attempt to secure client connection failed. Ensure that client is using {0} and any of the following ciphers: {1}.
+SSE0102I=Securing server connection.
+SSE0102E=Attempt to secure server connection failed. Ensure that server accepts {0} and any of the following ciphers: {1}.
+SSE0103I=Connecting to server.
+SSE0104I=Closing client connection.
+SSE0105I=Client connection closed.
+SSE0106I=Connection to server complete.
+SSE0106E=Connection to server failed.
+SSE0107I=Securing client connection.
+SSE0108I=Client connection secured.
+SSE0109I=Securing client connection.
+SSE0110I=Client connection secured.
+SSE0111E=Exception received while starting a session. Exception: {0}
+SSE0112I=Session ended.
+SSE0112E=Received server close error: {0}
+SSE0113E=Received client close error: {0}
+SSE0114E=Received server close but no data received.  Review connection and SSL/TLS configuration to insure the correct host and attributes are specified.
+SSE0115E=Exception during connection to server: {0}
+SSE0116E=Attempt to secure connection with Pnode {0} failed. Ensure that Pnode is using {1} and any of the following ciphers: {2}.
+SSE0117E=Attempt to secure connection with Snode {0} failed. Ensure that Snode accepts {1} and any of the following ciphers: {2}.
+
+# Misc messages from logMessageCodes.properties
+SSP0043E = Error generating self-signed key-certificate: {0}
+SSP0044E = Error adding key-certificate: {0}
+SSP0045E = Error loading key-certificate: {0}
+SSP0046E = Error updating key-certificate: {0}
+SSP0047E = Error deleting key-certificate: {0}
+SSP0048E = Error listing key-certificates: {0}
+SSP0049E = Error exporting key-certificate: {0}
+SSP0050E = Error generating certificate signing request: {0}
+
+SSP103I=Session started from Peer Address: {0}
+SSP104I=Session Proceeding after Node match: {0}
+SSP105E=Unable to connect to primary or alternate servers for OutNode: {0}
+SSP107W=EA Cert Validation is configured, but a network connection to EA does not exist. EA connectivity should be configured correctly.
+SSP107E=Inbound connection is secured, EA Cert Validation is configured, but a network connection to EA does not exist. EA connectivity must be configured correctly.
+SSP175E=Invalid HTTP Request method. Client possibly attempting SSL/TLS connection.
+SSP109W=EA User Authentiation is configured, but a network connection to EA does not exist. EA connectivity needs to be configured correctly.
+SSP0239E=Primary outbound connection with {0}/{1} could not be established - {2}
+SSP0250E=Alternate outbound connection with {0}/{1} could not be established - {2}
+
+
+SSP0331E=Connection with perimeter server {0} is down. 
+SSP0332I=Connection with perimeter server {0} is up.
+SSP0333E=All routes for outbound node {1} for adapter {0} are offline.
+SSP0334I=All routes for outbound node {1} for adapter {0} are online.
+SSP0335W=Outbound node is offline: Node name={0}, Host={1}, Port={2}, Reason={3}
+SSP0336I=Outbound node is online: Node name={0}, Host={1}, Port={2}. 
+SSP0337E=All EA servers for adapter {0} are offline.
+SSP0338I=All EA servers for adapter {0} are online.
+SSP0339W=EA server is offline: EA name={0}, Host={1}, Port={2}, Reason={3}
+SSP0340I=EA server is online: EA name={0}, Host={1}, Port={2}. 
+SSP0361E=Stopping listener for adapter {0}: {1}
+SSP0362I=Restarting listener for adapter {0}
+SSP0363I=Listener for adapter {0} started.
+SSP0364I=Listener for adapter {0} stopped.
+
+SSP0422E=Rejecting inbound connection due to policy. Policy [{0}] has certificate validation enabled, but inbound node [{1}] connection is not secured.
+SSP0423E=Rejecting inbound connection due to policy. Policy [{0}] has certificate validation enabled, but inbound node [{1}] security configuration does not have client authentication enabled.
+
+SSP0467E=Cannot use key certificate [{0}] with {1}-bit key length. Key certificates with private keys shorter than {2} bits cannot be used in FIPS mode.
+SSP0468E=Cannot trust certificate with {0}-bit key length. Certificates with public keys shorter than {1} bits cannot be trusted in FIPS mode. Subject=[{2}] Issuer=[{3}] Serial=[{4}]
+SSP0469E=Cannot trust certificate with {0} signature algorithm. Certificates with signature algorithms other than {1} cannot be trusted in FIPS mode. Subject=[{2}] Issuer=[{3}] Serial=[{4}]
+SSP0470W=The selected TLS/SSL protocol [{0}] cannot be used in FIPS mode. Protocol will be forced to [{1}].
+
+#SSP-3049 IP/userId Blacklisting
+SSP0471W=Incoming IP is Blacklisted.
+SSP0472W=Userid ({0}) is Blacklisted - ({1}).
+
+#SSP-4326, SSP-5611 Audit logs for ICAP-HTTP
+SSP0551W=Request ({0}) {1} AV Scanning skipped, request size exceeded maximum ICAP request size ({2}) bytes
+SSP0552E=Request ({0}) {1} AV Scanning failed, malware detected, ICAP response : {2}, Virus name: {3}, Reputation: {4}, Geo Location: {5}
+SSP0553W=Request ({0}) {1} AV Scanning skipped, active ICAP Session limit ({2}) exceeded
+SSP0554E=Request ({0}) {1} AV Scanning skipped and session failed, active ICAP Session limit ({2}) exceeded
+SSP0555I=Request ({0}) {1} AV Scanning succeeded, no virus/malware, ICAP response code: {2}
+SSP0558E=Request ({0}) {1} AV Scanning error - {2}, not sending request to Server
+SSP0559W=Request ({0}) {1} AV Scanning not completed, sending unscanned request to Server, error: {2}
+SSP0570E=Could not allocate buffers for http file upload request
+SSP0580E=UnsupportedEncodingException for http file upload request
+SSP0584W=Request ({0}) {1} AV Scanning skipped, request is chunked into multiple part(s) ({2})
